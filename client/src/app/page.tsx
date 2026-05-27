@@ -10,7 +10,7 @@ import { Message, SearchInfo } from "../types";
 
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([
-    { id: 1, content: "Hi there, how can I help you?", type: "assistant" },
+    { id: "1", content: "Hi there, how can I help you?", type: "assistant" },
   ]);
   const [loading, setLoading] = useState(false);
   const [checkpointId, setCheckpointId] = useState<string | null>(null);
@@ -35,7 +35,7 @@ export default function Home() {
 
   const handleNewChat = () => {
     setMessages([
-      { id: 1, content: "Hi there, how can I help you?", type: "assistant" },
+      { id: "1", content: "Hi there, how can I help you?", type: "assistant" },
     ]);
     setCheckpointId(null);
     setSuggestedQuestions([]);
@@ -67,9 +67,9 @@ export default function Home() {
 
       const userMsgId =
         messages.length > 0
-          ? Math.max(...messages.map((msg) => msg.id)) + 1
-          : 1;
-      const aiResponseId = userMsgId + 1;
+          ? (Math.max(...messages.map((msg) => parseInt(msg.id))) + 1).toString()
+          : "2";
+      const aiResponseId = (parseInt(userMsgId) + 1).toString();
 
       setMessages((prev) => [
         ...prev,

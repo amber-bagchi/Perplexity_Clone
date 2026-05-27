@@ -1,12 +1,18 @@
 export interface SearchInfo {
   urls?: string[];
+  stages?: string[];
+  query?: string;
+  error?: string;
 }
 
 export interface Message {
   id: string;
+  content?: string;
   type: "user" | "assistant";
-  sections?: Section[]; // structured sections
+  sections?: Section[];
   searchInfo?: SearchInfo;
+  isUser?: boolean;
+  isLoading?: boolean;
 }
 
 export type Section =
