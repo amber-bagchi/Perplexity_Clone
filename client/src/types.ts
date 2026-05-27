@@ -1,10 +1,12 @@
+export interface SearchInfo {
+  urls?: string[];
+}
+
 export interface Message {
   id: string;
   type: "user" | "assistant";
   sections?: Section[]; // structured sections
-  searchInfo?: {
-    urls?: string[];
-  };
+  searchInfo?: SearchInfo;
 }
 
 export type Section =
