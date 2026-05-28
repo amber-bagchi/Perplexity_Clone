@@ -1,169 +1,209 @@
-# Perplexity Clone - AI-Powered Search & Chat Assistant
+# 🤖 Perplexity 2.0 – AI-Powered Search & Chat Assistant
 
-An end-to-end AI-powered search engine assistant inspired by Perplexity AI, built with React, FastAPI, and Google Generative AI.
+ ### An end-to-end AI-powered search engine assistant 🔎✨ inspired by Perplexity AI, built with:
 
-## Features
+ #### 🎨 Frontend: React + TypeScript + TailwindCSS
 
-- Conversational Q&A with AI
-- Integrated Web Search (via Tavily API)
-- Syntax-Highlighted Code Blocks
-- Real-time Streaming Responses (SSE)
-- Beautiful, user-friendly UI with message history
-- Focus Modes (General, Academic, Coding, News, YouTube, Reddit)
-- Message history and suggested follow-up questions
+##### ⚙️ Backend: FastAPI (Python) with SSE (Server-Sent Events)
 
-## Tech Stack
+##### 🧠 LLM & Search APIs: Google Generative AI + Tavily Search
 
-### Frontend
-- Next.js 15 + React 19
-- TypeScript
-- TailwindCSS
-- React Markdown
+##### 📊 Extras: Syntax highlighting, chart rendering, tables, and more
 
-### Backend
-- FastAPI (Python)
-- Server-Sent Events (SSE) for streaming responses
-- Google Generative AI (Gemini 2.5 Flash)
-- Tavily Search API
+##### 🌍 Live Demo: https://client-733g.vercel.app/
 
-## Project Structure
+## 📌 Features
+
+##### ✅ Conversational Q&A with AI
+##### ✅ Integrated Web Search (via Tavily API)
+##### ✅ Syntax-Highlighted Code Blocks 💻
+##### ✅ Inline Tables & Charts 📊
+##### ✅ Live Streaming Responses (SSE) ⚡
+##### ✅ User-friendly UI with message history
+
+## 🏗️ Architecture Flow
+### 1. Mermaid Diagram
+```
+flowchart TD
+
+    User["🧑 User (Browser)"] -->|Types a question| Frontend["🎨 Frontend (React + TS)"]
+
+    Frontend -->|Send request via SSE| Backend["⚙️ Backend (FastAPI + Python)"]
+
+    Backend -->|Query| Search["🌐 Tavily Search API"]
+
+    Backend -->|Send query| LLM["🧠 Google Generative AI"]
+
+    Search --> Backend
+
+    LLM --> Backend
+
+    Backend -->|Stream response (sections: text/code/chart/table)| Frontend
+
+    Frontend -->|Renders beautifully ✨| User
+```
+
+### 2. ASCII + Emoji Diagram (GitHub-safe 🪄)
+```
+🧑 User
+   │  (asks question)
+   ▼
+🎨 Frontend (React + TS)
+   │  (SSE request)
+   ▼
+⚙️ Backend (FastAPI + Python)
+   ├──> 🌐 Tavily Search API
+   └──> 🧠 Google Generative AI
+          │
+          ▼
+   (merge results & stream back)
+   │
+   ▼
+🎨 Frontend UI
+   │
+   ▼
+🧑 User sees ✨ text, 💻 code, 📊 charts, 📋 tables
 
 ```
-perplexity-clone/
-├── client/                 # Next.js Frontend
+
+## 📂 Project Structure
+```
+Perplexity-2.0/
+│── client/                # 🎨 Frontend (React + Vite + TS)
 │   ├── src/
-│   │   ├── app/           # Next.js app directory
-│   │   └── components/    # React components
-│   ├── package.json
-│   └── .env.local
+│   │   ├── components/    # UI components (Chat UI, CodeBlock, MessageList)
+│   │   ├── pages/         # Main pages
+│   │   ├── types.ts       # Shared TypeScript interfaces
+│   │   └── App.tsx        # Entry point
+│   └── package.json
 │
-├── server/                # FastAPI Backend
-│   ├── app.py             # Main FastAPI application
+│── server/                # ⚙️ Backend (FastAPI + Python)
+│   ├── app.py             # Main FastAPI app
 │   ├── requirements.txt   # Python dependencies
-│   ├── .env               # Environment variables
-│   └── Dockerfile         # Docker configuration
+│   └── src/               # Helper modules (LLM, search, SSE handling)
 │
-├── .gitignore
-├── run.bat                # Windows batch runner
-├── run.ps1                # PowerShell runner
-└── README.md              # This file
+│── .env                   # 🔑 API keys (not committed)
+│── README.md              # 📖 This file
+│── .gitignore
 ```
 
-## Getting Started
+## ⚙️ Tech Stack
 
-### Prerequisites
-- Python 3.9+
-- Node.js 18+
-- Google Generative AI API key
-- Tavily Search API key
+### 🔹 Frontend
 
-### Local Development
+  - React + TypeScript
 
-#### 1. Clone the Repository
-```bash
-git clone https://github.com/amber-bagchi/Perplexity_Clone.git
-cd Perplexity_Clone
+  - TailwindCSS (styling)
+
+  - Recharts (charts 📊)
+
+  - React-Syntax-Highlighter (code blocks)
+
+### 🔹 Backend
+
+  - FastAPI (Python)
+
+  - Server-Sent Events (SSE) for streaming responses
+
+  - LangChain + Google Generative AI API
+
+  - Tavily Search API
+
+## 🚀 Getting Started (Local Development)
+
+### 1️⃣ Clone the Repo
 ```
-
-#### 2. Setup Backend
-```bash
+git clone https://github.com/your-username/perplexity-2.0.git
+cd perplexity-2.0
+```
+### 2️⃣ Setup Backend (FastAPI)
+```
 cd server
 python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+source venv/bin/activate  # (Windows: venv\Scripts\activate)
 pip install -r requirements.txt
 ```
 
-#### 3. Setup Environment Variables
-Create `server/.env`:
+### 🔑 Environment Variables
+
+#### Create a .env file inside server/ with:
 ```
 GOOGLE_API_KEY=your_google_api_key_here
 TAVILY_API_KEY=your_tavily_api_key_here
 ```
 
-Create `client/.env.local`:
+#### Run backend:
 ```
-NEXT_PUBLIC_BACKEND_URL=http://localhost:8000
+uvicorn app:app --reload
 ```
 
-#### 4. Run Backend
-```bash
-cd server
-python -m uvicorn app:app --reload
+#### Backend runs at: 
 ```
-Backend: http://127.0.0.1:8000
+http://127.0.0.1:8000
+```
 
-#### 5. Run Frontend
-```bash
+### 3️⃣ Setup Frontend (React + Vite)
+
+```
 cd client
 npm install
 npm run dev
 ```
-Frontend: http://localhost:3000
 
-### Quick Start (Windows)
+Frontend runs at: http://localhost:3000
 
-Run both services simultaneously:
-```bash
-./run.bat          # For Command Prompt
-# or
-./run.ps1          # For PowerShell
+## 🌍 Deployment Guide
+
+### 🚀 Deploy Backend on Render
+
+#### Push code to GitHub.
+
+#### Go to Render
+ #### → New Web Service.
+
+#### Connect your GitHub repo → select server/ as the root directory.
+
+#### Set environment variables under Settings → Environment:
+```
+GOOGLE_API_KEY=your_google_api_key_here
+TAVILY_API_KEY=your_tavily_api_key_here
 ```
 
-## Deployment
-
-### Backend Deployment (Render)
-
-1. Push code to GitHub
-2. Go to [Render](https://render.com)
-3. Create a new Web Service
-4. Connect your GitHub repository
-5. Set the root directory to `server/`
-6. Add environment variables:
-   - `GOOGLE_API_KEY`
-   - `TAVILY_API_KEY`
-7. Build command: `pip install -r requirements.txt`
-8. Start command: `uvicorn app:app --host 0.0.0.0 --port 10000`
-
-### Frontend Deployment (Vercel)
-
-1. Go to [Vercel](https://vercel.com)
-2. Import your GitHub repository
-3. Set the root directory to `client/`
-4. Add environment variables:
-   - `NEXT_PUBLIC_BACKEND_URL=your_render_backend_url`
-5. Deploy
-
-## Environment Variables
-
-### Backend (server/.env)
-- `GOOGLE_API_KEY` - Google Generative AI API key
-- `TAVILY_API_KEY` - Tavily Search API key
-
-### Frontend (client/.env.local)
-- `NEXT_PUBLIC_BACKEND_URL` - Backend API URL (http://localhost:8000 for local, Render URL for production)
-
-## API Endpoints
-
-### POST /chat
-Sends a message and streams the AI response with web search integration.
-
-Request:
-```json
-{
-  "message": "What is React?",
-  "focus_mode": "General"
-}
+### Build & Start Command:
+```
+pip install -r requirements.txt && uvicorn app:app --host 0.0.0.0 --port 10000
 ```
 
-Response: Server-Sent Events stream with AI-generated response and sources.
+### Render gives you a live backend URL like:
 
-## License
+ ```https://perplexity-backend.onrender.com```
 
-MIT License
+### 🎨 Deploy Frontend on Vercel
 
-## Author
+#### Go to Vercel
+ #### → New Project.
 
-Amber Bagchi
+#### Import GitHub repo → select client/ as project root.
 
----
-*Fresh deployment*
+#### In Environment Variables, add:
+
+```VITE_BACKEND_URL=https://perplexity-backend.onrender.com```
+
+
+#### Vercel auto-deploys → get live frontend link:
+
+```https://perplexity-frontend.vercel.app```
+
+## 🔮 Future Improvements
+
+#### ✅ Add authentication 🔑
+
+#### ✅ Multi-modal (images + voice input 🎤)
+
+#### ✅ Save chat history 📜
+
+#### ✅ Export results (PDF/Markdown)
+
+## 👨‍💻 Author
+
+Made with ❤️ by Amber Bagchi
