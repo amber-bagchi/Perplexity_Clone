@@ -20,7 +20,7 @@ export default function MessageArea({ messages }: MessageAreaProps) {
   }, [messages]);
 
   const parseMarkdown = (text: string) => {
-    const parts: JSX.Element[] = [];
+    const parts: React.ReactNode[] = [];
     let lastIndex = 0;
     let keyCounter = 0;
 
@@ -145,7 +145,7 @@ export default function MessageArea({ messages }: MessageAreaProps) {
 
   const renderMessageContent = (content: string) => {
     const codeRegex = /```(\w+)?\n([\s\S]*?)```/g;
-    const parts: JSX.Element[] = [];
+    const parts: React.ReactNode[] = [];
     let lastIndex = 0;
     let match;
     let keyCounter = 0;
