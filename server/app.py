@@ -63,7 +63,7 @@ async def call_gemini(prompt: str):
         "generationConfig": {
             "temperature": 0.5,
             "topP": 0.9,
-            "maxOutputTokens": 2048
+            "maxOutputTokens": 4096
         }
     }
 
@@ -188,19 +188,21 @@ async def generate_chat_responses(message: str, checkpoint_id: Optional[str] = N
 
 Question: {message}
 
+IMPORTANT: Complete ALL sections. Do NOT truncate or leave incomplete.
+
 Instructions:
 - {length_instruction}
-- Use clear, simple language
-- Use **bold** only for key terms
-- Provide COMPLETE responses - don't truncate explanations
-- For code questions: include algorithm explanation, complete code, time/space complexity, and examples
-- Use code blocks with triple backticks for code examples:
+- Provide COMPLETE explanations for every section you start
+- For code: Show complete, working code with comments
+- Always include: Time Complexity (Best, Average, Worst), Space Complexity
+- For algorithms: Explanation → Code → Complexity → Examples
+- Use code blocks:
   ```language
-  code here
+  code
   ```
-- Format lists with bullet points (use • prefix)
-- Include ALL sections requested (explanation, code, complexity analysis, dry run, etc.)
-- Be comprehensive and thorough"""
+- Use • for lists
+- Keep explanations concise but COMPLETE
+- Finish every section you start - no truncation allowed"""
 
         # Get AI response
         response_text = ""
