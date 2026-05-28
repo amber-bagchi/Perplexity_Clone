@@ -24,9 +24,8 @@ export default function MessageArea({ messages }: MessageAreaProps) {
     let lastIndex = 0;
     let keyCounter = 0;
 
-    // Improved regex to capture code blocks with or without language
-    const codeRegex = /```([\w]*)\n([\s\S]*?)```/g;
-    const headerRegex = /^(#{1,6})\s+(.+)$/gm;
+    // Better regex to capture code blocks - handles various formats
+    const codeRegex = /```([\w]*)\s*\n([\s\S]*?)\n```/g;
 
     let match;
     const codeMatches: Array<{ index: number; length: number; lang: string; code: string }> = [];
@@ -36,8 +35,8 @@ export default function MessageArea({ messages }: MessageAreaProps) {
       codeMatches.push({
         index: match.index,
         length: match[0].length,
-        lang: match[1] || "plaintext",
-        code: match[2].trim(),
+        lang: match[1]?.trim() || "plaintext",
+        code: match[2],
       });
     }
 
