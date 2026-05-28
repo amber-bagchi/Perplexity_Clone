@@ -19,23 +19,143 @@ export default function MessageArea({ messages }: MessageAreaProps) {
     }
   }, [messages]);
 
-  const parseMarkdown = (text: string) => {
+  const renderMessageContent = (content: string) => {
     const parts: React.ReactNode[] = [];
     let lastIndex = 0;
     let keyCounter = 0;
 
-    // Handle bold text (**text**)
-    const boldRegex = /\*\*(.*?)\*\*/g;
-    const italicRegex = /\*(.*?)\*/g;
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
-
-    // Process text with multiple markdown patterns
-    let processedText = text;
-
-    // First, find all patterns with their positions
-    const patterns: Array<{ start: number; end: number; type: string; content: string }> = [];
+    // Improved regex to capture code blocks with or without language
+    const codeRegex = /```([\w]*)\n([\s\S]*?)```/g;
+    const headerRegex = /^(#{1,6})\s+(.+)$/gm;
 
     let match;
+    const codeMatches: Array<{ index: number; length: number; lang: string; code: string }> = [];
+
+    // Find all code blocks
+    while ((match = codeRegex.exec(content)) !== null) {
+      codeMatches.push({
+        index: match.index,
+        length: match[0].length,
+        lang: match[1] || "plaintext",
+        code: match[2].trim(),
+      });
+    }
+
+    // Process content by code blocks first
+    codeMatches.forEach((codeBlock) => {
+      if (lastIndex < codeBlock.index) {
+        const textBefore = content.slice(lastIndex, codeBlock.index);
+        renderTextBlock(textBefore, parts, keyCounter);
+        keyCounter += 10;
+      }
+
+      // Render code block
+      parts.push(
+        <CodeBlock
+          key={`code-${keyCounter++}`}
+          language={codeBlock.lang}
+          code={codeBlock.code}
+        />
+      );
+
+      lastIndex = codeBlock.index + codeBlock.length;
+    });
+
+    // Handle remaining text
+    if (lastIndex < content.length) {
+      const remainingText = content.slice(lastIndex);
+      renderTextBlock(remainingText, parts, keyCounter);
+    }
+
+    return <div className="space-y-4">{parts}</div>;
+  };
+
+  const renderTextBlock = (text: string, parts: React.ReactNode[], startKeyCounter: number) => {
+    const lines = text.split("\n");
+    let keyCounter = startKeyCounter;
+
+    lines.forEach((line) => {
+      const trimmedLine = line.trim();
+
+      // Handle headers
+      const headerMatch = trimmedLine.match(/^(#{1,6})\s+(.+)$/);
+      if (headerMatch) {
+        const level = headerMatch[1].length;
+        const headerText = headerMatch[2];
+        const headingClasses = {
+          1: "text-3xl font-bold mt-4 mb-2",
+          2: "text-2xl font-bold mt-3 mb-2",
+          3: "text-xl font-bold mt-2 mb-2",
+          4: "text-lg font-bold mt-2 mb-2",
+          5: "text-base font-bold mt-2 mb-2",
+          6: "text-sm font-bold mt-2 mb-2",
+        };
+
+        parts.push(
+          <div
+            key={`header-${keyCounter++}`}
+            className={`${headingClasses[level as keyof typeof headingClasses]} text-white`}
+          >
+            {headerText}
+          </div>
+        );
+        return;
+      }
+
+      // Handle list items
+      const listMatch = trimmedLine.match(/^[\*\-\+]\s+(.+)$/);
+      if (listMatch) {
+        parts.push(
+          <div key={`list-${keyCounter++}`} className="ml-4 text-gray-200 flex gap-3">
+            <span className="text-blue-400 flex-shrink-0">•</span>
+            <span>{parseInlineMarkdown(listMatch[1])}</span>
+          </div>
+        );
+        return;
+      }
+
+      // Handle numbered lists
+      const numberedListMatch = trimmedLine.match(/^\d+\.\s+(.+)$/);
+      if (numberedListMatch) {
+        parts.push(
+          <div key={`list-${keyCounter++}`} className="ml-4 text-gray-200 flex gap-3">
+            <span className="text-blue-400 flex-shrink-0">◆</span>
+            <span>{parseInlineMarkdown(numberedListMatch[1])}</span>
+          </div>
+        );
+        return;
+      }
+
+      // Handle empty lines
+      if (!trimmedLine) {
+        parts.push(<div key={`space-${keyCounter++}`} className="h-2"></div>);
+        return;
+      }
+
+      // Regular paragraph
+      parts.push(
+        <div
+          key={`para-${keyCounter++}`}
+          className="text-gray-200 leading-relaxed text-base"
+        >
+          {parseInlineMarkdown(line)}
+        </div>
+      );
+    });
+  };
+
+  const parseInlineMarkdown = (text: string) => {
+    const parts: React.ReactNode[] = [];
+    let lastIndex = 0;
+    let keyCounter = 0;
+
+    // Bold text
+    const boldRegex = /\*\*(.*?)\*\*/g;
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+
+    let match;
+    const patterns: Array<{ start: number; end: number; type: string; content: string }> = [];
+
     while ((match = boldRegex.exec(text)) !== null) {
       patterns.push({
         start: match.index,
@@ -45,11 +165,9 @@ export default function MessageArea({ messages }: MessageAreaProps) {
       });
     }
 
-    // Sort patterns by start position
     patterns.sort((a, b) => a.start - b.start);
 
-    lastIndex = 0;
-    patterns.forEach((pattern, i) => {
+    patterns.forEach((pattern) => {
       if (lastIndex < pattern.start) {
         const textBefore = text.slice(lastIndex, pattern.start);
         const urlMatches = Array.from(textBefore.matchAll(urlRegex));
@@ -70,7 +188,7 @@ export default function MessageArea({ messages }: MessageAreaProps) {
                 href={urlMatch[0]}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-400 hover:text-blue-300 hover:underline break-all transition-colors"
+                className="text-blue-400 hover:text-blue-300 hover:underline transition-colors"
               >
                 {urlMatch[0]}
               </a>
@@ -91,7 +209,7 @@ export default function MessageArea({ messages }: MessageAreaProps) {
 
       if (pattern.type === "bold") {
         parts.push(
-          <strong key={`bold-${keyCounter++}`} className="font-semibold text-white">
+          <strong key={`bold-${keyCounter++}`} className="font-bold text-white">
             {pattern.content}
           </strong>
         );
@@ -100,7 +218,6 @@ export default function MessageArea({ messages }: MessageAreaProps) {
       lastIndex = pattern.end;
     });
 
-    // Handle remaining text
     if (lastIndex < text.length) {
       const remainingText = text.slice(lastIndex);
       const urlMatches = Array.from(remainingText.matchAll(urlRegex));
@@ -121,7 +238,7 @@ export default function MessageArea({ messages }: MessageAreaProps) {
               href={urlMatch[0]}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-400 hover:text-blue-300 underline break-all"
+              className="text-blue-400 hover:text-blue-300 hover:underline transition-colors"
             >
               {urlMatch[0]}
             </a>
@@ -143,90 +260,6 @@ export default function MessageArea({ messages }: MessageAreaProps) {
     return parts.length > 0 ? parts : text;
   };
 
-  const renderMessageContent = (content: string) => {
-    const codeRegex = /```(\w+)?\n([\s\S]*?)```/g;
-    const parts: React.ReactNode[] = [];
-    let lastIndex = 0;
-    let match;
-    let keyCounter = 0;
-
-    while ((match = codeRegex.exec(content)) !== null) {
-      const [fullMatch, lang, code] = match;
-      const index = match.index;
-
-      if (index > lastIndex) {
-        const textBefore = content.slice(lastIndex, index);
-        const lines = textBefore.split("\n");
-
-        parts.push(
-          <div key={`text-${keyCounter++}`} className="space-y-2">
-            {lines.map((line, i) => {
-              const trimmedLine = line.trim();
-              if (!trimmedLine) return <div key={`line-${i}`} className="h-2"></div>;
-
-              // Check if line is a list item
-              const isListItem = /^[\*\-\+]\s/.test(trimmedLine) || /^\d+\.\s/.test(trimmedLine);
-
-              return (
-                <div
-                  key={`line-${i}`}
-                  className={`leading-relaxed ${
-                    isListItem
-                      ? "ml-4 text-gray-200 before:content-['•'] before:mr-3 before:text-blue-400"
-                      : "text-gray-200"
-                  }`}
-                >
-                  {parseMarkdown(isListItem ? trimmedLine.replace(/^[\*\-\+]\s/, "").replace(/^\d+\.\s/, "") : line)}
-                </div>
-              );
-            })}
-          </div>
-        );
-      }
-
-      parts.push(
-        <CodeBlock
-          key={`code-${keyCounter++}`}
-          language={lang || "plaintext"}
-          code={code.trim()}
-        />
-      );
-
-      lastIndex = index + fullMatch.length;
-    }
-
-    if (lastIndex < content.length) {
-      const remainingText = content.slice(lastIndex);
-      const lines = remainingText.split("\n");
-
-      parts.push(
-        <div key={`text-${keyCounter++}`} className="space-y-2">
-          {lines.map((line, i) => {
-            const trimmedLine = line.trim();
-            if (!trimmedLine) return <div key={`line-${i}`} className="h-2"></div>;
-
-            const isListItem = /^[\*\-\+]\s/.test(trimmedLine) || /^\d+\.\s/.test(trimmedLine);
-
-            return (
-              <div
-                key={`line-${i}`}
-                className={`leading-relaxed ${
-                  isListItem
-                    ? "ml-4 text-gray-200 before:content-['•'] before:mr-3 before:text-blue-400"
-                    : "text-gray-200"
-                }`}
-              >
-                {parseMarkdown(isListItem ? trimmedLine.replace(/^[\*\-\+]\s/, "").replace(/^\d+\.\s/, "") : line)}
-              </div>
-            );
-          })}
-        </div>
-      );
-    }
-
-    return <div className="space-y-4">{parts}</div>;
-  };
-
   return (
     <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6 bg-black text-white">
       {messages.map((msg) => (
@@ -245,7 +278,7 @@ export default function MessageArea({ messages }: MessageAreaProps) {
             <div className="flex flex-col gap-3 flex-1">
               {/* Main response */}
               {msg.content && (
-                <div className="space-y-3 text-gray-100">
+                <div className="space-y-3">
                   {renderMessageContent(msg.content)}
                 </div>
               )}
@@ -254,9 +287,9 @@ export default function MessageArea({ messages }: MessageAreaProps) {
               {msg.isLoading && (
                 <div className="flex items-center gap-2 text-gray-400 text-sm">
                   <div className="animate-pulse">⚪</div>
-                  {msg.searchInfo?.stages?.includes("searching") && "🔍 Searching the web..."}
-                  {msg.searchInfo?.stages?.includes("reading") && "📖 Reading results..."}
-                  {msg.searchInfo?.stages?.includes("writing") && "✍️ Generating response..."}
+                  {msg.searchInfo?.stages?.includes("searching") && "Searching the web..."}
+                  {msg.searchInfo?.stages?.includes("reading") && "Reading results..."}
+                  {msg.searchInfo?.stages?.includes("writing") && "Generating response..."}
                 </div>
               )}
 
