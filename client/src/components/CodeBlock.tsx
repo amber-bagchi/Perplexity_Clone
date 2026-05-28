@@ -1,9 +1,5 @@
 "use client";
 
-// @ts-ignore - react-syntax-highlighter doesn't have types
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-// @ts-ignore
-import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { useState } from "react";
 import { Copy, Check } from "lucide-react";
 
@@ -27,7 +23,6 @@ export default function CodeBlock({ language, code }: CodeBlockProps) {
 
   return (
     <div className="relative bg-gray-950 rounded-lg overflow-hidden shadow-lg my-4 border border-gray-800">
-      {/* Header */}
       <div className="flex items-center justify-between px-4 py-2 bg-gray-900 border-b border-gray-800">
         <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
           {language}
@@ -50,21 +45,9 @@ export default function CodeBlock({ language, code }: CodeBlockProps) {
         </button>
       </div>
 
-      {/* Code */}
-      <SyntaxHighlighter
-        language={language}
-        style={oneDark}
-        customStyle={{
-          padding: "1rem",
-          margin: 0,
-          fontSize: "0.9rem",
-          background: "transparent",
-          maxHeight: "400px",
-          overflow: "auto",
-        }}
-      >
-        {code}
-      </SyntaxHighlighter>
+      <pre className="px-4 py-3 text-sm bg-gray-950 text-gray-100 overflow-auto max-h-96 font-mono">
+        <code>{code}</code>
+      </pre>
     </div>
   );
 }
