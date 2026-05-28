@@ -70,7 +70,7 @@ export default function MessageArea({ messages }: MessageAreaProps) {
                 href={urlMatch[0]}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-400 hover:text-blue-300 underline break-all"
+                className="text-blue-400 hover:text-blue-300 hover:underline break-all transition-colors"
               >
                 {urlMatch[0]}
               </a>
@@ -159,16 +159,27 @@ export default function MessageArea({ messages }: MessageAreaProps) {
         const lines = textBefore.split("\n");
 
         parts.push(
-          <div key={`text-${keyCounter++}`} className="space-y-3">
-            {lines.map((line, i) => (
-              line.trim() ? (
-                <div key={`line-${i}`} className="text-base leading-relaxed text-gray-200">
-                  {parseMarkdown(line)}
+          <div key={`text-${keyCounter++}`} className="space-y-2">
+            {lines.map((line, i) => {
+              const trimmedLine = line.trim();
+              if (!trimmedLine) return <div key={`line-${i}`} className="h-2"></div>;
+
+              // Check if line is a list item
+              const isListItem = /^[\*\-\+]\s/.test(trimmedLine) || /^\d+\.\s/.test(trimmedLine);
+
+              return (
+                <div
+                  key={`line-${i}`}
+                  className={`leading-relaxed ${
+                    isListItem
+                      ? "ml-4 text-gray-200 before:content-['•'] before:mr-3 before:text-blue-400"
+                      : "text-gray-200"
+                  }`}
+                >
+                  {parseMarkdown(isListItem ? trimmedLine.replace(/^[\*\-\+]\s/, "").replace(/^\d+\.\s/, "") : line)}
                 </div>
-              ) : (
-                <div key={`line-${i}`}></div>
-              )
-            ))}
+              );
+            })}
           </div>
         );
       }
@@ -189,16 +200,26 @@ export default function MessageArea({ messages }: MessageAreaProps) {
       const lines = remainingText.split("\n");
 
       parts.push(
-        <div key={`text-${keyCounter++}`} className="space-y-3">
-          {lines.map((line, i) => (
-            line.trim() ? (
-              <div key={`line-${i}`} className="text-base leading-relaxed text-gray-200">
-                {parseMarkdown(line)}
+        <div key={`text-${keyCounter++}`} className="space-y-2">
+          {lines.map((line, i) => {
+            const trimmedLine = line.trim();
+            if (!trimmedLine) return <div key={`line-${i}`} className="h-2"></div>;
+
+            const isListItem = /^[\*\-\+]\s/.test(trimmedLine) || /^\d+\.\s/.test(trimmedLine);
+
+            return (
+              <div
+                key={`line-${i}`}
+                className={`leading-relaxed ${
+                  isListItem
+                    ? "ml-4 text-gray-200 before:content-['•'] before:mr-3 before:text-blue-400"
+                    : "text-gray-200"
+                }`}
+              >
+                {parseMarkdown(isListItem ? trimmedLine.replace(/^[\*\-\+]\s/, "").replace(/^\d+\.\s/, "") : line)}
               </div>
-            ) : (
-              <div key={`line-${i}`}></div>
-            )
-          ))}
+            );
+          })}
         </div>
       );
     }
@@ -213,7 +234,7 @@ export default function MessageArea({ messages }: MessageAreaProps) {
           {/* User message - right aligned */}
           {msg.type === "user" && (
             <div className="flex flex-col gap-2 ml-auto">
-              <div className="bg-blue-600 text-white rounded-lg px-4 py-2 max-w-md break-words shadow-sm">
+              <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl px-4 py-3 max-w-md break-words shadow-md hover:shadow-lg transition-shadow">
                 {msg.content}
               </div>
             </div>
@@ -224,7 +245,7 @@ export default function MessageArea({ messages }: MessageAreaProps) {
             <div className="flex flex-col gap-3 flex-1">
               {/* Main response */}
               {msg.content && (
-                <div className="space-y-4">
+                <div className="space-y-3 text-gray-100">
                   {renderMessageContent(msg.content)}
                 </div>
               )}
