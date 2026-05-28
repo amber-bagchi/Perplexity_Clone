@@ -69,12 +69,11 @@ async def call_gemini(prompt: str):
 
     try:
         print(f"[DEBUG] Calling Gemini API at {url[:50]}...")
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=120.0) as client:
             response = await client.post(
                 url,
                 json=payload,
-                headers=headers,
-                timeout=60
+                headers=headers
             )
 
             print(f"[DEBUG] Gemini response status: {response.status_code}")
@@ -105,8 +104,9 @@ async def call_gemini(prompt: str):
                 yield "No response from Gemini API"
 
     except Exception as e:
-        print(f"[DEBUG] Gemini error: {type(e).__name__}: {str(e)}")
-        yield f"Error: {str(e)}"
+        error_msg = f"{type(e).__name__}: {str(e)}"
+        print(f"[DEBUG] Gemini error: {error_msg}")
+        yield f"I encountered a temporary issue processing your request. Please try again in a moment."
 
 def should_search(query: str) -> bool:
     """Determine if we should search the web for this query"""
