@@ -63,7 +63,7 @@ async def call_gemini(prompt: str):
         "generationConfig": {
             "temperature": 0.5,
             "topP": 0.9,
-            "maxOutputTokens": 1024
+            "maxOutputTokens": 2048
         }
     }
 
@@ -180,7 +180,7 @@ async def generate_chat_responses(message: str, checkpoint_id: Optional[str] = N
         elif question_length < 15:
             length_instruction = "Provide a concise answer (3-4 paragraphs max)."
         else:
-            length_instruction = "Provide a detailed answer (5-6 paragraphs max)."
+            length_instruction = "Provide a comprehensive, complete answer with full details, examples, and explanations. Don't truncate - complete all sections."
 
         # Prepare optimized prompt
         full_prompt = f"""Search Results:
@@ -192,13 +192,15 @@ Instructions:
 - {length_instruction}
 - Use clear, simple language
 - Use **bold** only for key terms
-- Use code blocks with triple backticks for code examples
-- If explaining code, format it properly:
+- Provide COMPLETE responses - don't truncate explanations
+- For code questions: include algorithm explanation, complete code, time/space complexity, and examples
+- Use code blocks with triple backticks for code examples:
   ```language
   code here
   ```
-- Format lists with bullet points
-- Be direct and avoid unnecessary elaboration"""
+- Format lists with bullet points (use • prefix)
+- Include ALL sections requested (explanation, code, complexity analysis, dry run, etc.)
+- Be comprehensive and thorough"""
 
         # Get AI response
         response_text = ""
