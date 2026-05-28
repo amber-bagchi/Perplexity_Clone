@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { Message } from "../types";
 import CodeBlock from "./CodeBlock";
 import MessageActions from "./MessageActions";
