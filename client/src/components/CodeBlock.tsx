@@ -1,6 +1,8 @@
 "use client";
 
+// @ts-ignore - react-syntax-highlighter doesn't have types
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+// @ts-ignore
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { useState } from "react";
 import { Copy, Check } from "lucide-react";
