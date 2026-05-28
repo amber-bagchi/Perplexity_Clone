@@ -61,9 +61,9 @@ async def call_gemini(prompt: str):
             "parts": [{"text": prompt}]
         }],
         "generationConfig": {
-            "temperature": 0.7,
-            "topP": 0.95,
-            "maxOutputTokens": 2048
+            "temperature": 0.5,
+            "topP": 0.9,
+            "maxOutputTokens": 1024
         }
     }
 
@@ -168,18 +168,37 @@ async def generate_chat_responses(message: str, checkpoint_id: Optional[str] = N
         # Build search context with better formatting
         search_context = ""
         if search_results:
-            search_context = "Based on the latest search results:\n\n"
-            for i, result in enumerate(search_results[:4], 1):
+            for i, result in enumerate(search_results[:3], 1):
                 title = result.get('title', 'Untitled')
                 snippet = result.get('snippet', '')
                 search_context += f"• {title}: {snippet}\n"
 
-        # Prepare prompt with search results
-        full_prompt = f"""{search_context}
+        # Determine response length based on question
+        question_length = len(message.split())
+        if question_length < 5:
+            length_instruction = "Keep your answer brief (2-3 sentences max)."
+        elif question_length < 15:
+            length_instruction = "Provide a concise answer (3-4 paragraphs max)."
+        else:
+            length_instruction = "Provide a detailed answer (5-6 paragraphs max)."
 
-User Question: {message}
+        # Prepare optimized prompt
+        full_prompt = f"""Search Results:
+{search_context if search_context else 'None'}
 
-Please provide a comprehensive and well-formatted answer. Use markdown formatting with **bold** for important terms, and structure your response clearly with line breaks. Include relevant citations when referring to the search results. Make the response conversational and easy to read."""
+Question: {message}
+
+Instructions:
+- {length_instruction}
+- Use clear, simple language
+- Use **bold** only for key terms
+- Use code blocks with triple backticks for code examples
+- If explaining code, format it properly:
+  ```language
+  code here
+  ```
+- Format lists with bullet points
+- Be direct and avoid unnecessary elaboration"""
 
         # Get AI response
         response_text = ""

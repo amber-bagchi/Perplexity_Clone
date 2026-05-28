@@ -144,119 +144,22 @@ export default function MessageArea({ messages }: MessageAreaProps) {
   };
 
   const parseInlineMarkdown = (text: string) => {
-    const parts: React.ReactNode[] = [];
-    let lastIndex = 0;
-    let keyCounter = 0;
+    // First pass: replace markdown patterns with HTML
+    let result = text;
 
-    // Bold text
-    const boldRegex = /\*\*(.*?)\*\*/g;
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    // Handle bold text - must be done before other replacements
+    result = result.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
-    let match;
-    const patterns: Array<{ start: number; end: number; type: string; content: string }> = [];
+    // Handle italics
+    result = result.replace(/\*(.*?)\*/g, '<em>$1</em>');
 
-    while ((match = boldRegex.exec(text)) !== null) {
-      patterns.push({
-        start: match.index,
-        end: match.index + match[0].length,
-        type: "bold",
-        content: match[1],
-      });
-    }
+    // Handle links with HTML anchor tags
+    result = result.replace(
+      /(https?:\/\/[^\s<>]+)/g,
+      '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300 hover:underline">$1</a>'
+    );
 
-    patterns.sort((a, b) => a.start - b.start);
-
-    patterns.forEach((pattern) => {
-      if (lastIndex < pattern.start) {
-        const textBefore = text.slice(lastIndex, pattern.start);
-        const urlMatches = Array.from(textBefore.matchAll(urlRegex));
-
-        if (urlMatches.length > 0) {
-          let subLastIndex = 0;
-          urlMatches.forEach((urlMatch) => {
-            if (subLastIndex < urlMatch.index) {
-              parts.push(
-                <span key={`text-${keyCounter++}`}>
-                  {textBefore.slice(subLastIndex, urlMatch.index)}
-                </span>
-              );
-            }
-            parts.push(
-              <a
-                key={`url-${keyCounter++}`}
-                href={urlMatch[0]}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-400 hover:text-blue-300 hover:underline transition-colors"
-              >
-                {urlMatch[0]}
-              </a>
-            );
-            subLastIndex = urlMatch.index + urlMatch[0].length;
-          });
-          if (subLastIndex < textBefore.length) {
-            parts.push(
-              <span key={`text-${keyCounter++}`}>{textBefore.slice(subLastIndex)}</span>
-            );
-          }
-        } else {
-          parts.push(
-            <span key={`text-${keyCounter++}`}>{textBefore}</span>
-          );
-        }
-      }
-
-      if (pattern.type === "bold") {
-        parts.push(
-          <strong key={`bold-${keyCounter++}`} className="font-bold text-white">
-            {pattern.content}
-          </strong>
-        );
-      }
-
-      lastIndex = pattern.end;
-    });
-
-    if (lastIndex < text.length) {
-      const remainingText = text.slice(lastIndex);
-      const urlMatches = Array.from(remainingText.matchAll(urlRegex));
-
-      if (urlMatches.length > 0) {
-        let subLastIndex = 0;
-        urlMatches.forEach((urlMatch) => {
-          if (subLastIndex < urlMatch.index) {
-            parts.push(
-              <span key={`text-${keyCounter++}`}>
-                {remainingText.slice(subLastIndex, urlMatch.index)}
-              </span>
-            );
-          }
-          parts.push(
-            <a
-              key={`url-${keyCounter++}`}
-              href={urlMatch[0]}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-400 hover:text-blue-300 hover:underline transition-colors"
-            >
-              {urlMatch[0]}
-            </a>
-          );
-          subLastIndex = urlMatch.index + urlMatch[0].length;
-        });
-        if (subLastIndex < remainingText.length) {
-          parts.push(
-            <span key={`text-${keyCounter++}`}>{remainingText.slice(subLastIndex)}</span>
-          );
-        }
-      } else {
-        parts.push(
-          <span key={`text-${keyCounter++}`}>{remainingText}</span>
-        );
-      }
-    }
-
-    return parts.length > 0 ? parts : text;
+    return <div dangerouslySetInnerHTML={{ __html: result }} />;
   };
 
   return (
