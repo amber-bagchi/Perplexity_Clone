@@ -136,8 +136,9 @@ export default function Home() {
                 typeof data.urls === "string"
                   ? JSON.parse(data.urls)
                   : data.urls;
-              const newSearchInfo = {
-                stages: [...(searchData?.stages ?? []), "reading"],
+              const currentStages: string[] = searchData?.stages || [];
+              const newSearchInfo: SearchInfo = {
+                stages: [...currentStages, "reading"],
                 query: searchData?.query || "",
                 urls,
               };
@@ -154,8 +155,9 @@ export default function Home() {
                 )
               );
             } else if (data.type === "search_error") {
-              const newSearchInfo = {
-                stages: [...(searchData?.stages ?? []), "error"],
+              const currentStages: string[] = searchData?.stages || [];
+              const newSearchInfo: SearchInfo = {
+                stages: [...currentStages, "error"],
                 query: searchData?.query || "",
                 urls: [],
                 error: data.error || "Unknown error",
@@ -174,10 +176,10 @@ export default function Home() {
                 )
               );
             } else if (data.type === "end") {
-              if (searchData) {
-                const finalSearchInfo = {
+              if (searchData && searchData.stages) {
+                const finalSearchInfo: SearchInfo = {
                   ...searchData,
-                  stages: [...(searchData?.stages ?? []), "complete"],
+                  stages: [...searchData.stages, "complete"],
                 };
                 setMessages((prev) =>
                   prev.map((msg) =>
@@ -221,8 +223,7 @@ export default function Home() {
   );
 
   const generateSuggestedQuestions = (response: string) => {
-    // Simple heuristic to generate follow-up questions
-    const questions = [];
+    const questions: string[] = [];
 
     if (response.includes("history")) {
       questions.push("What are the historical implications?");
