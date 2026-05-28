@@ -137,9 +137,7 @@ export default function Home() {
                   ? JSON.parse(data.urls)
                   : data.urls;
               const newSearchInfo = {
-                stages: searchData
-                  ? [...searchData.stages, "reading"]
-                  : ["reading"],
+                stages: [...(searchData?.stages ?? []), "reading"],
                 query: searchData?.query || "",
                 urls,
               };
@@ -157,9 +155,7 @@ export default function Home() {
               );
             } else if (data.type === "search_error") {
               const newSearchInfo = {
-                stages: searchData
-                  ? [...searchData.stages, "error"]
-                  : ["error"],
+                stages: [...(searchData?.stages ?? []), "error"],
                 query: searchData?.query || "",
                 urls: [],
                 error: data.error || "Unknown error",
@@ -181,7 +177,7 @@ export default function Home() {
               if (searchData) {
                 const finalSearchInfo = {
                   ...searchData,
-                  stages: [...searchData.stages, "complete"],
+                  stages: [...(searchData?.stages ?? []), "complete"],
                 };
                 setMessages((prev) =>
                   prev.map((msg) =>
